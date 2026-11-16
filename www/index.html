@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Anime Quiz</title>
+<style>
+:root{--ink:#120d24;--vio:#6c3cff;--sak:#ff6fa8;--gold:#ffd36b;--mist:#e9e4ff;--ok:#3ddc97;--bad:#ff4d6d}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;color:var(--mist);font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:linear-gradient(120deg,#120d24,#2a1458,#0f2a5c,#3b1252);background-size:400% 400%;animation:bg 18s ease infinite;overflow-x:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+@keyframes bg{50%{background-position:100% 50%}}
+.petal{position:fixed;top:-30px;width:12px;height:12px;border-radius:12px 0;background:var(--sak);opacity:.5;animation:fall linear infinite;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg) translateX(60px)}}
+main{max-width:480px;margin:auto;padding:16px;position:relative}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+h1{font-size:1.5rem;font-weight:900;letter-spacing:-.5px;background:linear-gradient(90deg,var(--sak),var(--gold));-webkit-background-clip:text;color:transparent}
+.stats{display:flex;gap:8px;font-weight:700;font-size:.9rem}
+.stats span{background:#ffffff14;border:1px solid #ffffff22;padding:6px 10px;border-radius:20px;backdrop-filter:blur(8px)}
+.card{background:#ffffff12;border:1px solid #ffffff26;border-radius:24px;padding:14px;backdrop-filter:blur(14px);box-shadow:0 20px 50px #0008}
+.pic{height:230px;border-radius:16px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--vio),var(--sak));display:grid;place-items:center;font-size:4rem}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s,transform 6s;transform:scale(1.08)}
+.pic img.on{opacity:1;transform:scale(1)}
+.pic::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 60%,#120d24cc)}
+.shine{position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,#fff3 50%,transparent 60%);background-size:250% 100%;animation:sh 3s infinite;z-index:2}
+@keyframes sh{from{background-position:150% 0}to{background-position:-50% 0}}
+.q{margin:14px 2px 6px;font-weight:800;color:var(--gold)}
+ul{list-style:none;display:grid;gap:8px;margin-bottom:12px}
+li{background:#ffffff10;border-left:4px solid var(--sak);padding:10px 12px;border-radius:10px;animation:in .4s}
+@keyframes in{from{opacity:0;transform:translateX(-20px)}}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.opt{padding:14px 8px;border-radius:14px;background:#ffffff1a;border:1px solid #ffffff30;font-weight:700;font-size:.9rem;transition:transform .15s,background .2s}
+.opt:active{transform:scale(.95)}
+.opt.ok{background:var(--ok);color:#06281a;animation:pop .5s}
+.opt.bad{background:var(--bad);animation:shake .4s}
+.opt:disabled:not(.ok):not(.bad){opacity:.45}
+@keyframes pop{50%{transform:scale(1.08)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.row{display:flex;gap:10px;margin-top:12px}
+.btn{flex:1;padding:14px;border-radius:14px;font-weight:800;background:linear-gradient(90deg,var(--vio),var(--sak));box-shadow:0 8px 24px #6c3cff66}
+.btn.alt{background:#ffffff1a;box-shadow:none;border:1px solid #ffffff30}
+.btn:disabled{opacity:.4}
+.over{position:fixed;inset:0;background:#120d24ee;display:none;place-items:center;text-align:center;padding:24px;z-index:9}
+.over.show{display:grid;animation:in .5s}
+.over h2{font-size:2.2rem;margin:8px 0}
+.big{font-size:3.4rem;font-weight:900;color:var(--gold)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<main>
+<header><h1>Anime Quiz</h1><div class="stats"><span id="lv">❤❤❤</span><span id="sc">0 pts</span><span id="st">🔥0</span></div></header>
+<div class="card">
+<div class="pic" id="pic"><div class="shine"></div>🌸</div>
+<p class="q" id="q">¿Qué anime es?</p>
+<ul id="clues"></ul>
+<div class="opts" id="opts"></div>
+<div class="row"><button class="btn alt" id="hint">Otra pista (−puntos)</button><button class="btn" id="next" disabled>Siguiente</button></div>
+</div>
+</main>
+<div class="over" id="over"><div><p>Fin de la partida</p><h2>¡Buen trabajo!</h2><div class="big" id="fs">0</div><p id="fb"></p><br><button class="btn" id="again" style="width:220px">Jugar otra vez</button></div></div>
+<script>
+const RAW=`Naruto|Usa chakra/Cabello amarillo/Sueña con ser Hokage
+One Piece|Pirata elástico/Sombrero de paja/Busca el tesoro One Piece
+Dragon Ball Z|Esferas del dragón/Guerreros Saiyajin/Cabello dorado al transformarse
+Bleach|Shinigami/Espada Zanpakutō/Cabello naranja
+Attack on Titan|Gigantes devoradores/Ciudad con muros/Equipo de maniobras
+Death Note|Cuaderno que mata/Shinigami Ryuk/Detective L
+Fullmetal Alchemist|Hermanos alquimistas/Piedra filosofal/Brazo de metal
+Hunter x Hunter|Examen de cazador/Poder Nen/Gon busca a su padre
+My Hero Academia|Superpoderes llamados Quirks/Academia UA/All Might
+Demon Slayer|Cazador de demonios/Hermana convertida en demonio/Respiración del agua
+Jujutsu Kaisen|Energía maldita/Colegio de hechicería/Sukuna
+Sword Art Online|Videojuego mortal/Realidad virtual/Kirito
+Tokyo Ghoul|Seres que comen humanos/Ojo con kagune/Kaneki de cabello blanco
+One Punch Man|Héroe aburrido/Cabeza calva/Saitama
+Fairy Tail|Gremio de magos/Natsu, dragón de fuego/Marca del gremio
+Black Clover|Sin magia/Grimorio de cuatro hojas/Asta
+Dr. Stone|Humanidad petrificada/Ciencia como arma/Senku
+Haikyuu!!|Voleibol/Cuervos de Karasuno/Hinata salta muy alto
+Kuroko no Basket|Baloncesto/Generación de los milagros/Jugador fantasma
+Slam Dunk|Baloncesto/Cabello rojo/Equipo Shohoku
+Captain Tsubasa|Fútbol/Balón que vuela/Tsubasa Ozora
+Neon Genesis Evangelion|Robots biológicos/Organización Nerv/Shinji
+Cowboy Bebop|Cazarrecompensas espaciales/Nave Bebop/Spike Spiegel
+Steins;Gate|Viajes en el tiempo/Microondas/Okabe
+Code Geass|Mechas/Poder Geass/Lelouch
+Gurren Lagann|Taladro/Simón/Kamina con gafas
+Mob Psycho 100|Poderes psíquicos/Medidor de porcentaje/Reigen
+Spy x Family|Espía/Asesina/Niña telépata Anya
+Chainsaw Man|Demonio motosierra/Denji/Pochita
+Vinland Saga|Vikingos/Thorfinn/Venganza
+Berserk|Espada gigante/Guts/Marca del sacrificio
+JoJo's Bizarre Adventure|Stands/Poses extravagantes/Familia Joestar
+Dragon Ball|Niño con cola/Goku/Nube voladora
+Pokémon|Capturar criaturas/Pikachu/Ash
+Digimon|Monstruos digitales/Digivice/Agumon
+Yu-Gi-Oh!|Juego de cartas/Rompecabezas del milenio/Yugi
+Inuyasha|Mitad demonio perro/Fragmentos de Shikon/Viaje al pasado
+Sailor Moon|Guerreras mágicas/Gata Luna/Tiara
+Cardcaptor Sakura|Cartas Clow/Báculo mágico/Kero
+Ranma ½|Cambia de sexo con agua/Artes marciales/Trenza
+Detective Conan|Detective encogido/Organización negra/Gafas y lazo
+Lupin III|Ladrón caballero/Chaqueta verde/Fujiko
+Saint Seiya|Armaduras/Constelaciones/Santuario
+Yu Yu Hakusho|Detective espiritual/Pistola espiritual/Yusuke
+Rurouni Kenshin|Samurái con espada de filo invertido/Cicatriz en cruz/Era Meiji
+Gintama|Samurái de cabello plateado/Comedia absurda/Yorozuya
+Sakamoto Days|Asesino retirado/Tienda de barrio/Pasó a ser gordito
+Dandadan|Fantasmas y alienígenas/Momo/Okarun
+Solo Leveling|Cazadores/Mazmorras/Ejército de sombras
+Frieren|Elfa maga/Viaje tras derrotar al rey demonio/Longevidad
+Violet Evergarden|Muñeca de recuerdos/Escribe cartas/Prótesis metálicas
+Your Name|Intercambio de cuerpos/Cometa/Película de Makoto Shinkai
+Weathering With You|Chica que controla la lluvia/Tokio/Makoto Shinkai
+Spirited Away|Casa de baños de espíritus/Chihiro/Sin Cara
+Princess Mononoke|Dioses del bosque/Ashitaka/Loba San
+Howl's Moving Castle|Castillo andante/Mago Howl/Calcifer
+My Neighbor Totoro|Criatura del bosque/Gatobús/Dos hermanas
+Kiki's Delivery Service|Bruja repartidora/Escoba/Gato negro Jiji
+Akira|Moto roja/Neo-Tokio/Tetsuo
+Ghost in the Shell|Cyborg/Mayor Motoko/Hackeo
+Psycho-Pass|Sistema Sibyl/Coeficiente criminal/Dominator
+Re:Zero|Regresa al morir/Emilia/Subaru
+Overlord|Atrapado en un videojuego/Esqueleto mago/Ainz
+Tensei Shitara Slime Datta Ken|Reencarna en slime/Rimuru/Devora todo
+No Game No Life|Hermanos gamers/Disboard/Sora y Shiro
+Konosuba|Aventureros inútiles/Diosa Aqua/Megumin y sus explosiones
+Toradora!|Tigre diminuta/Romance escolar/Taiga
+Clannad|Drama familiar/Ushio/Nagisa
+Your Lie in April|Pianista/Violinista/Kaori
+Fruits Basket|Zodiaco chino/Transformaciones en animales/Tohru
+Ouran High School Host Club|Club de anfitriones/Chica disfrazada de chico/Haruhi
+Kaguya-sama: Love Is War|Guerra de amor/Consejo estudiantil/Shirogane
+Horimiya|Pareja escolar/Tatuajes ocultos/Hori y Miyamura
+Bocchi the Rock!|Guitarrista tímida/Banda/Cabello rosa
+K-On!|Música ligera/Club escolar/Pasteles
+Azumanga Daioh|Escuela/Chiyo/Comedia cotidiana
+Puella Magi Madoka Magica|Chicas mágicas oscuras/Kyubey/Contrato
+Fate/stay night|Guerra del Grial/Servants/Saber
+Made in Abyss|Abismo gigante/Niña exploradora/Reg el robot
+Dororo|Samurái con prótesis/Bebé/Demonios
+Mushishi|Criaturas Mushi/Ginko/Viajero
+Hellsing|Vampiro Alucard/Orden Hellsing/Seras
+Trigun|Pistolero pacifista/Cabello puntiagudo/Vash
+Samurai Champloo|Samuráis y hip hop/Mugen/Jin
+Black Lagoon|Mercenarios/Revy/Pistolas gemelas
+Fire Force|Bomberos con llamas/Shinra/Sonrisa del diablo
+Soul Eater|Guadañas humanas/Shibusen/Maka
+Blue Exorcist|Hijo de Satanás/Rin/Llamas azules
+Nanatsu no Taizai|Pecados capitales/Meliodas/Cerdita Hawk
+The Promised Neverland|Orfanato/Demonios/Emma
+Assassination Classroom|Profesor pulpo/Clase de asesinos/Koro-sensei
+Parasyte|Parásitos alienígenas/Mano que habla/Shinichi
+Monster|Médico/Johan/Thriller psicológico
+Great Teacher Onizuka|Profesor ex pandillero/Moto/Eikichi
+Initial D|Carreras de drift/Toyota AE86/Tofu
+Beyblade|Peonzas/Dragoon/Tyson
+Yo-kai Watch|Medallas/Reloj/Jibanyan
+Doraemon|Gato robot del futuro/Bolsillo mágico/Nobita
+Shin-chan|Niño travieso/Pantalones fuera/Familia Nohara
+Tower of God|Torre misteriosa/Pruebas/Bam
+Mashle|Sin magia pero muy musculoso/Magos/Mash
+Oshi no Ko|Idols/Reencarnación/Ai Hoshino
+Blue Lock|Fútbol/Delanteros egoístas/Isagi
+Kingdom|China antigua/Guerras/Xin
+Naruto Shippuden|Secuela/Akatsuki/Sasuke y Naruto adultos
+Dragon Ball Super|Torneo del poder/Dioses/Ultra Instinto
+Black Butler|Mayordomo demonio/Sebastian/Ciel Phantomhive
+Noragami|Dios menor/Chaqueta deportiva/Yato
+Magi|Mil y una noches/Aladdin/Djinns
+Seven Deadly Sins Dragon|Placeholder/Placeholder/Placeholder`.trim().split("\n").filter(l=>!l.includes("Placeholder")).map(l=>{const i=l.indexOf("|");return{n:l.slice(0,i),c:l.slice(i+1).split("/")}});
+const $=id=>document.getElementById(id);
+let S,cur,hints,deck=[],done;
+const best=()=>+(localStorage.getItem("aq_best")||0);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+for(let i=0;i<16;i++){const p=document.createElement("i");p.className="petal";p.style.cssText=`left:${Math.random()*100}vw;animation-duration:${8+Math.random()*10}s;animation-delay:-${Math.random()*14}s;transform:scale(${.6+Math.random()})`;document.body.appendChild(p)}
+function hud(){$("lv").textContent="❤".repeat(S.l)||"💔";$("sc").textContent=S.s+" pts";$("st").textContent="🔥"+S.k}
+function start(){S={s:0,l:3,k:0};deck=shuffle([...D]);$("over").classList.remove("show");round()}
+function loadImg(){const pic=$("pic");pic.querySelectorAll("img").forEach(e=>e.remove());
+ const t=new AbortController();setTimeout(()=>t.abort(),6000);
+ fetch("https://api.waifu.pics/sfw/waifu",{signal:t.signal}).then(r=>r.json()).then(d=>{const im=new Image();im.onload=()=>{pic.prepend(im);requestAnimationFrame(()=>im.classList.add("on"))};im.src=d.url}).catch(()=>{pic.style.background=`linear-gradient(${Math.random()*360}deg,#6c3cff,#ff6fa8)`})}
+function showClues(){$("clues").innerHTML=cur.c.slice(0,hints).map(c=>`<li>${c}</li>`).join("");$("hint").disabled=hints>=3||done;$("hint").textContent=hints>=3?"Sin más pistas":"Otra pista (−puntos)"}
+function round(){if(!deck.length)deck=shuffle([...D]);cur=deck.pop();hints=1;done=false;hud();
+ const o=shuffle([cur,...shuffle(D.filter(x=>x!==cur)).slice(0,3)]);
+ $("opts").innerHTML="";o.forEach(a=>{const b=document.createElement("button");b.className="opt";b.textContent=a.n;b.onclick=()=>answer(b,a);$("opts").appendChild(b)});
+ $("next").disabled=true;$("q").textContent="¿Qué anime es?";showClues();loadImg()}
+function answer(b,a){if(done)return;done=true;const ok=a===cur;
+ document.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.textContent===cur.n)x.classList.add("ok")});
+ if(ok){S.k++;S.s+=[100,60,30][hints-1]+S.k*10;$("q").textContent="¡Correcto! 🎉";burst()}
+ else{b.classList.add("bad");S.k=0;S.l--;$("q").textContent="Era "+cur.n}
+ hud();$("hint").disabled=true;
+ if(S.l<=0){setTimeout(end,1200)}else $("next").disabled=false}
+function burst(){for(let i=0;i<24;i++){const p=document.createElement("i");p.className="petal";p.style.cssText=`left:${Math.random()*100}vw;top:-10px;opacity:.9;background:${["#ff6fa8","#ffd36b","#6c3cff"][i%3]};animation-duration:${1.5+Math.random()*1.5}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),3200)}}
+function end(){const b=Math.max(best(),S.s);localStorage.setItem("aq_best",b);$("fs").textContent=S.s+" pts";$("fb").textContent="Récord: "+b+" pts";$("over").classList.add("show")}
+$("hint").onclick=()=>{if(hints<3&&!done){hints++;showClues()}};
+$("next").onclick=round;$("again").onclick=start;
+start();
+</script></body></html>
+                                                                                                                         
