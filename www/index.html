@@ -5,22 +5,36 @@
 <style>
 :root{--ink:#120d24;--vio:#6c3cff;--sak:#ff6fa8;--gold:#ffd36b;--mist:#e9e4ff;--ok:#3ddc97;--bad:#ff4d6d}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;color:var(--mist);font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:linear-gradient(120deg,#120d24,#2a1458,#0f2a5c,#3b1252);background-size:400% 400%;animation:bg 18s ease infinite;overflow-x:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body{min-height:100vh;color:var(--mist);font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:linear-gradient(120deg,#120d24,#2a1458,#0f2a5c,#3b1252);background-size:400% 400%;animation:bg 14s ease infinite;overflow-x:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 @keyframes bg{50%{background-position:100% 50%}}
-.petal{position:fixed;top:-30px;width:12px;height:12px;border-radius:12px 0;background:var(--sak);opacity:.5;animation:fall linear infinite;pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(60px);opacity:.45;pointer-events:none;animation:orb 12s ease-in-out infinite alternate}
+.o1{width:260px;height:260px;background:var(--vio);top:5%;left:-60px}
+.o2{width:300px;height:300px;background:var(--sak);bottom:0;right:-80px;animation-duration:16s}
+.o3{width:200px;height:200px;background:#2bb4ff;top:45%;left:30%;animation-duration:20s}
+@keyframes orb{to{transform:translate(90px,-120px) scale(1.3)}}
+.petal{position:fixed;top:-30px;width:12px;height:12px;border-radius:12px 0;background:var(--sak);opacity:.5;animation:fall linear infinite;pointer-events:none;z-index:1}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg) translateX(60px)}}
-main{max-width:480px;margin:auto;padding:16px;position:relative}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-h1{font-size:1.5rem;font-weight:900;letter-spacing:-.5px;background:linear-gradient(90deg,var(--sak),var(--gold));-webkit-background-clip:text;color:transparent}
-.stats{display:flex;gap:8px;font-weight:700;font-size:.9rem}
-.stats span{background:#ffffff14;border:1px solid #ffffff22;padding:6px 10px;border-radius:20px;backdrop-filter:blur(8px)}
+main{max-width:480px;margin:auto;padding:16px;position:relative;z-index:2}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+h1{font-size:1.4rem;font-weight:900;letter-spacing:-.5px;background:linear-gradient(90deg,var(--sak),var(--gold));-webkit-background-clip:text;color:transparent}
+.stats{display:flex;gap:6px;font-weight:700;font-size:.85rem}
+.stats span{background:#ffffff14;border:1px solid #ffffff22;padding:6px 9px;border-radius:20px;backdrop-filter:blur(8px)}
+#st.pop{animation:pop .5s}
+.timer{height:10px;border-radius:10px;background:#ffffff1a;overflow:hidden;margin-bottom:6px}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--ok),var(--gold));border-radius:10px}
+.timer.low i{background:var(--bad)}
+.tt{text-align:right;font-weight:800;font-size:.85rem;margin-bottom:8px}
+.tt.low{color:var(--bad);animation:pop .5s infinite}
 .card{background:#ffffff12;border:1px solid #ffffff26;border-radius:24px;padding:14px;backdrop-filter:blur(14px);box-shadow:0 20px 50px #0008}
-.pic{height:230px;border-radius:16px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--vio),var(--sak));display:grid;place-items:center;font-size:4rem}
+.pic{height:230px;border-radius:16px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--vio),var(--sak));display:grid;place-items:center;font-size:3rem;text-align:center}
+.pic small{display:block;font-size:.75rem;margin-top:6px;opacity:.85}
 .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s,transform 6s;transform:scale(1.08)}
 .pic img.on{opacity:1;transform:scale(1)}
-.pic::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 60%,#120d24cc)}
-.shine{position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,#fff3 50%,transparent 60%);background-size:250% 100%;animation:sh 3s infinite;z-index:2}
+.pic::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 65%,#120d24cc);pointer-events:none}
+.shine{position:absolute;inset:0;background:linear-gradient(100deg,transparent 40%,#fff3 50%,transparent 60%);background-size:250% 100%;animation:sh 3s infinite;z-index:2;pointer-events:none}
 @keyframes sh{from{background-position:150% 0}to{background-position:-50% 0}}
+.toast{position:absolute;left:0;right:0;top:40%;text-align:center;font-weight:900;font-size:1.8rem;color:var(--gold);text-shadow:0 2px 12px #000;z-index:3;animation:up 1.4s forwards;pointer-events:none}
+@keyframes up{to{transform:translateY(-60px);opacity:0}}
 .q{margin:14px 2px 6px;font-weight:800;color:var(--gold)}
 ul{list-style:none;display:grid;gap:8px;margin-bottom:12px}
 li{background:#ffffff10;border-left:4px solid var(--sak);padding:10px 12px;border-radius:10px;animation:in .4s}
@@ -32,29 +46,52 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .opt.ok{background:var(--ok);color:#06281a;animation:pop .5s}
 .opt.bad{background:var(--bad);animation:shake .4s}
 .opt:disabled:not(.ok):not(.bad){opacity:.45}
-@keyframes pop{50%{transform:scale(1.08)}}
+@keyframes pop{50%{transform:scale(1.12)}}
 @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 .row{display:flex;gap:10px;margin-top:12px}
 .btn{flex:1;padding:14px;border-radius:14px;font-weight:800;background:linear-gradient(90deg,var(--vio),var(--sak));box-shadow:0 8px 24px #6c3cff66}
 .btn.alt{background:#ffffff1a;box-shadow:none;border:1px solid #ffffff30}
 .btn:disabled{opacity:.4}
-.over{position:fixed;inset:0;background:#120d24ee;display:none;place-items:center;text-align:center;padding:24px;z-index:9}
-.over.show{display:grid;animation:in .5s}
-.over h2{font-size:2.2rem;margin:8px 0}
+.scr{position:fixed;inset:0;z-index:5;display:none;place-items:center;text-align:center;padding:24px}
+.scr.show{display:grid;animation:in .5s}
+#over{background:#120d24ee}
+.logo{font-size:5rem;display:inline-block;animation:spin 8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lt{font-size:2.8rem;font-weight:900;letter-spacing:-1px;background:linear-gradient(90deg,var(--sak),var(--gold),var(--sak));background-size:200%;-webkit-background-clip:text;color:transparent;animation:bg 4s linear infinite}
+.sub{opacity:.85;margin:6px 0 18px}
+.rules{display:grid;gap:8px;max-width:300px;margin:0 auto 22px;text-align:left}
+.rules div{background:#ffffff14;border:1px solid #ffffff22;border-radius:12px;padding:9px 12px;font-size:.9rem}
 .big{font-size:3.4rem;font-weight:900;color:var(--gold)}
+#play,#again{width:240px;font-size:1.1rem;animation:pulse 1.6s infinite;margin-bottom:10px}
+@keyframes pulse{50%{transform:scale(1.05)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<main>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+
+<div class="scr show" id="lobby"><div>
+<div class="logo">🌸</div>
+<div class="lt">Anime Quiz</div>
+<p class="sub">Adivina el anime con pistas</p>
+<div class="rules"><div>⏱ 10 segundos por pregunta</div><div>💡 Menos pistas = más puntos</div><div>🔥 Cada acierto seguido sube tu racha</div><div>❤ Tienes 3 vidas</div></div>
+<button class="btn" id="play">Jugar</button>
+<p id="rec">Récord: 0 pts</p>
+</div></div>
+
+<main id="game" style="display:none">
 <header><h1>Anime Quiz</h1><div class="stats"><span id="lv">❤❤❤</span><span id="sc">0 pts</span><span id="st">🔥0</span></div></header>
+<div class="timer" id="tbar"><i id="tfill"></i></div>
+<div class="tt" id="tt">10.0 s</div>
 <div class="card">
-<div class="pic" id="pic"><div class="shine"></div>🌸</div>
+<div class="pic" id="pic"><div class="shine"></div><div id="ph">🌸<small>Cargando imagen…</small></div></div>
 <p class="q" id="q">¿Qué anime es?</p>
 <ul id="clues"></ul>
 <div class="opts" id="opts"></div>
 <div class="row"><button class="btn alt" id="hint">Otra pista (−puntos)</button><button class="btn" id="next" disabled>Siguiente</button></div>
 </div>
 </main>
-<div class="over" id="over"><div><p>Fin de la partida</p><h2>¡Buen trabajo!</h2><div class="big" id="fs">0</div><p id="fb"></p><br><button class="btn" id="again" style="width:220px">Jugar otra vez</button></div></div>
+
+<div class="scr" id="over"><div><p>Fin de la partida</p><h2 style="font-size:2.2rem;margin:8px 0">¡Buen trabajo!</h2><div class="big" id="fs">0</div><p id="fb"></p><p id="fk"></p><br><button class="btn" id="again">Jugar otra vez</button><br><button class="btn alt" id="menu" style="width:240px">Menú</button></div></div>
+
 <script>
 const D=`Naruto|Usa chakra/Cabello amarillo/Sueña con ser Hokage
 One Piece|Pirata elástico/Sombrero de paja/Busca el tesoro One Piece
@@ -164,32 +201,60 @@ Naruto Shippuden|Secuela/Akatsuki/Sasuke y Naruto adultos
 Dragon Ball Super|Torneo del poder/Dioses/Ultra Instinto
 Black Butler|Mayordomo demonio/Sebastian/Ciel Phantomhive
 Noragami|Dios menor/Chaqueta deportiva/Yato
-Magi|Mil y una noches/Aladdin/Djinns
-Seven Deadly Sins Dragon|Placeholder/Placeholder/Placeholder`.trim().split("\n").filter(l=>!l.includes("Placeholder")).map(l=>{const i=l.indexOf("|");return{n:l.slice(0,i),c:l.slice(i+1).split("/")}});
+Magi|Mil y una noches/Aladdin/Djinns`.trim().split("\n").map(l=>{const i=l.indexOf("|");return{n:l.slice(0,i),c:l.slice(i+1).split("/")}});
 const $=id=>document.getElementById(id);
-let S,cur,hints,deck=[],done;
-const best=()=>+(localStorage.getItem("aq_best")||0);
+const TIME=10;
+let S,cur,hints,deck=[],done,tl,tmr,imgId=0;
+const best=()=>{try{return+(localStorage.getItem("aq_best")||0)}catch(e){return 0}};
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-for(let i=0;i<16;i++){const p=document.createElement("i");p.className="petal";p.style.cssText=`left:${Math.random()*100}vw;animation-duration:${8+Math.random()*10}s;animation-delay:-${Math.random()*14}s;transform:scale(${.6+Math.random()})`;document.body.appendChild(p)}
-function hud(){$("lv").textContent="❤".repeat(S.l)||"💔";$("sc").textContent=S.s+" pts";$("st").textContent="🔥"+S.k}
-function start(){S={s:0,l:3,k:0};deck=shuffle([...D]);$("over").classList.remove("show");round()}
-function loadImg(){const pic=$("pic");pic.querySelectorAll("img").forEach(e=>e.remove());
- const t=new AbortController();setTimeout(()=>t.abort(),6000);
- fetch("https://api.waifu.pics/sfw/waifu",{signal:t.signal}).then(r=>r.json()).then(d=>{const im=new Image();im.onload=()=>{pic.prepend(im);requestAnimationFrame(()=>im.classList.add("on"))};im.src=d.url}).catch(()=>{pic.style.background=`linear-gradient(${Math.random()*360}deg,#6c3cff,#ff6fa8)`})}
+const pick=a=>a[Math.random()*a.length|0];
+for(let i=0;i<16;i++){const p=document.createElement("i");p.className="petal";p.style.cssText=`left:${Math.random()*100}vw;animation-duration:${8+Math.random()*10}s;animation-delay:-${Math.random()*14}s`;document.body.appendChild(p)}
+
+function hud(){$("lv").textContent="❤".repeat(Math.max(S.l,0))||"💔";$("sc").textContent=S.s+" pts";$("st").textContent="🔥"+S.k}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;$("pic").appendChild(d);setTimeout(()=>d.remove(),1500)}
+function lobby(){clearInterval(tmr);$("over").classList.remove("show");$("game").style.display="none";$("rec").textContent="Récord: "+best()+" pts";$("lobby").classList.add("show")}
+function start(){S={s:0,l:3,k:0,mk:0};deck=shuffle([...D]);$("lobby").classList.remove("show");$("over").classList.remove("show");$("game").style.display="block";round()}
+
+/* Imágenes: varias fuentes, con reintento al tocar */
+const to=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("t")),ms))]);
+const SRC=[
+ async()=>(await (await fetch("https://api.waifu.pics/sfw/"+pick(["waifu","neko","shinobu","megumin","smile","happy"]))).json()).url,
+ async()=>(await (await fetch("https://nekos.best/api/v2/"+pick(["waifu","neko","kitsune"]))).json()).results[0].url
+];
+function loadable(u){return new Promise((ok,no)=>{const im=new Image();im.referrerPolicy="no-referrer";im.onload=()=>ok(im);im.onerror=()=>no(new Error("img"));im.src=u})}
+async function loadImg(){const id=++imgId,pic=$("pic");
+ pic.querySelectorAll("img").forEach(e=>e.remove());
+ $("ph").innerHTML="🌸<small>Cargando imagen…</small>";$("ph").style.display="block";
+ for(const f of shuffle([...SRC])){
+  try{const u=await to(f(),7000);const im=await to(loadable(u),9000);
+   if(id!==imgId)return;pic.prepend(im);requestAnimationFrame(()=>im.classList.add("on"));$("ph").style.display="none";return}catch(e){}
+ }
+ if(id===imgId)$("ph").innerHTML="🌸<small>Sin conexión · toca para reintentar</small>"}
+$("pic").onclick=()=>{if($("ph").style.display!=="none")loadImg()};
+
+/* Tiempo */
+function tick(){tl=Math.max(0,tl-.1);const low=tl<=3;
+ $("tfill").style.width=(tl/TIME*100)+"%";$("tt").textContent=tl.toFixed(1)+" s";
+ $("tbar").classList.toggle("low",low);$("tt").classList.toggle("low",low);
+ if(tl<=0){clearInterval(tmr);finish(false,null,true)}}
 function showClues(){$("clues").innerHTML=cur.c.slice(0,hints).map(c=>`<li>${c}</li>`).join("");$("hint").disabled=hints>=3||done;$("hint").textContent=hints>=3?"Sin más pistas":"Otra pista (−puntos)"}
 function round(){if(!deck.length)deck=shuffle([...D]);cur=deck.pop();hints=1;done=false;hud();
  const o=shuffle([cur,...shuffle(D.filter(x=>x!==cur)).slice(0,3)]);
- $("opts").innerHTML="";o.forEach(a=>{const b=document.createElement("button");b.className="opt";b.textContent=a.n;b.onclick=()=>answer(b,a);$("opts").appendChild(b)});
- $("next").disabled=true;$("q").textContent="¿Qué anime es?";showClues();loadImg()}
-function answer(b,a){if(done)return;done=true;const ok=a===cur;
+ $("opts").innerHTML="";o.forEach(a=>{const b=document.createElement("button");b.className="opt";b.textContent=a.n;b.onclick=()=>finish(a===cur,b,false);$("opts").appendChild(b)});
+ $("next").disabled=true;$("q").textContent="¿Qué anime es?";showClues();loadImg();
+ clearInterval(tmr);tl=TIME;tick();tmr=setInterval(tick,100)}
+
+function finish(ok,b,timeout){if(done)return;done=true;clearInterval(tmr);
  document.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.textContent===cur.n)x.classList.add("ok")});
- if(ok){S.k++;S.s+=[100,60,30][hints-1]+S.k*10;$("q").textContent="¡Correcto! 🎉";burst()}
- else{b.classList.add("bad");S.k=0;S.l--;$("q").textContent="Era "+cur.n}
+ if(ok){S.k++;S.mk=Math.max(S.mk,S.k);const pts=[100,60,30][hints-1]+S.k*10+Math.ceil(tl);S.s+=pts;
+  $("q").textContent="¡Correcto! 🎉";toast("+"+pts+(S.k>1?"  🔥x"+S.k:""));$("st").classList.remove("pop");void $("st").offsetWidth;$("st").classList.add("pop");burst()}
+ else{if(b)b.classList.add("bad");S.k=0;S.l--;$("q").textContent=(timeout?"¡Tiempo! Era ":"Era ")+cur.n}
  hud();$("hint").disabled=true;
- if(S.l<=0){setTimeout(end,1200)}else $("next").disabled=false}
+ if(S.l<=0)setTimeout(end,1300);else $("next").disabled=false}
 function burst(){for(let i=0;i<24;i++){const p=document.createElement("i");p.className="petal";p.style.cssText=`left:${Math.random()*100}vw;top:-10px;opacity:.9;background:${["#ff6fa8","#ffd36b","#6c3cff"][i%3]};animation-duration:${1.5+Math.random()*1.5}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),3200)}}
-function end(){const b=Math.max(best(),S.s);localStorage.setItem("aq_best",b);$("fs").textContent=S.s+" pts";$("fb").textContent="Récord: "+b+" pts";$("over").classList.add("show")}
+function end(){const b=Math.max(best(),S.s);try{localStorage.setItem("aq_best",b)}catch(e){}
+ $("fs").textContent=S.s+" pts";$("fb").textContent="Récord: "+b+" pts";$("fk").textContent="Mejor racha: "+S.mk+" 🔥";$("over").classList.add("show")}
 $("hint").onclick=()=>{if(hints<3&&!done){hints++;showClues()}};
-$("next").onclick=round;$("again").onclick=start;
-start();
+$("next").onclick=round;$("play").onclick=start;$("again").onclick=start;$("menu").onclick=lobby;
+lobby();
 </script></body></html>
